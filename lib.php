@@ -95,6 +95,54 @@ function link_hier(array $param): string
     return basename($pfad) . '?' . http_build_query($query);
 }
 
+/*
+ * ---- Darstellung (hell/dunkel) ----
+ * 'auto' folgt der Einstellung des Geräts, 'hell' und 'dunkel' legen sie fest.
+ */
+const THEMEN = ['auto' => 'Automatisch', 'hell' => 'Hell', 'dunkel' => 'Dunkel'];
+
+/** Gewählte Darstellung: ?thema=… (wird gemerkt) › Cookie › 'auto' */
+function thema(): string
+{
+    static $thema = null;
+    if ($thema !== null) {
+        return $thema;
+    }
+    $wahl = $_GET['thema'] ?? null;
+    if (is_string($wahl) && isset(THEMEN[$wahl])) {
+        if (!headers_sent()) {
+            setcookie('thema', $wahl, ['expires' => time() + 365 * 86400, 'path' => '/', 'samesite' => 'Lax']);
+        }
+        return $thema = $wahl;
+    }
+    $cookie = $_COOKIE['thema'] ?? null;
+    return $thema = (is_string($cookie) && isset(THEMEN[$cookie])) ? $cookie : 'auto';
+}
+
+/** Umschalter Automatisch / Hell / Dunkel (Links mit Symbol). */
+function themawahl(): string
+{
+    $symbol = [
+        'auto' => '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>',
+        'hell' => '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6 13 13M3 13l1.4-1.4M11.6 4.4 13 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+        'dunkel' => '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7z" fill="currentColor"/></svg>',
+    ];
+    $html = '<nav class="themawahl" aria-label="' . h(t('Darstellung')) . '">';
+    foreach (THEMEN as $code => $name) {
+        $inhalt = $symbol[$code] . '<span class="thema-name">' . h(t($name)) . '</span>';
+        $html .= $code === thema()
+            ? '<span aria-current="true">' . $inhalt . '</span>'
+            : '<a href="' . h(link_hier(['thema' => $code])) . '">' . $inhalt . '</a>';
+    }
+    return $html . '</nav>';
+}
+
+/** Sprach- und Darstellungsumschalter zusammen. */
+function umschalter(): string
+{
+    return '<div class="umschalter-leiste">' . sprachwahl() . themawahl() . '</div>';
+}
+
 /** Sprachumschalter (Links). */
 function sprachwahl(): string
 {
@@ -824,15 +872,18 @@ function rangliste_tabelle(array $zeilen, string $spielart, ?int $markiert = nul
 
 function kopf(string $titel): void
 {
-    echo '<!doctype html><html lang="' . (sprache() === 'fr' ? 'fr-CH' : 'de-CH') . '"><head><meta charset="utf-8">'
+    $thema = thema();
+    echo '<!doctype html><html lang="' . (sprache() === 'fr' ? 'fr-CH' : 'de-CH') . '"'
+        . ($thema !== 'auto' ? ' data-theme="' . $thema . '"' : '') . '><head><meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<meta name="color-scheme" content="' . ['auto' => 'light dark', 'hell' => 'light', 'dunkel' => 'dark'][$thema] . '">'
         . '<title>' . h($titel) . '</title><link rel="stylesheet" href="style.css"></head><body><main>';
 }
 
 function fuss(): void
 {
     echo '</main><footer class="app-footer">'
-        . sprachwahl()
+        . umschalter()
         . '<a href="https://github.com/laudatioUno/CountryQuiz/releases" rel="noopener">CountryQuiz ' . h(APP_VERSION) . '</a>'
         . '</footer></body></html>';
 }

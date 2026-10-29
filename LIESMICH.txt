@@ -119,6 +119,13 @@ Französische Texte und Länder-/Hauptstadtnamen: lang/fr.php.
 Auf Französisch werden Tippfehler toleriert, der Lautvergleich
 ("Lichtenstein") gilt nur auf Deutsch.
 
+DARSTELLUNG (HELL/DUNKEL)
+-------------------------
+Standardmässig folgt das Quiz der Einstellung des Geräts (hell oder dunkel).
+Mit dem Umschalter Automatisch / Hell / Dunkel (oben auf der Startseite und
+unten auf jeder Seite) lässt sich das festlegen; die Wahl wird im Browser
+gemerkt. Die Farben stehen als Variablen am Anfang von style.css.
+
 UPDATE VON EINER ÄLTEREN VERSION
 --------------------------------
 1. Alle Dateien hochladen und bestehende überschreiben.

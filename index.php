@@ -57,7 +57,7 @@ $alle = count(LAENDER);
 $stufeGewaehlt = $stufe ?: 'mittel';
 kopf(t('Flaggenquiz Europa'));
 ?>
-<div class="oben-rechts"><?= sprachwahl() ?></div>
+<div class="oben-rechts"><?= umschalter() ?></div>
 <header class="hero">
   <h1><?= h(t('Flaggenquiz Europa')) ?></h1>
   <p><?= h(t('Flaggen und Umrisse erkennen – Länder und Hauptstädte üben.')) ?></p>
