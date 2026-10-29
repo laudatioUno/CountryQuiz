@@ -30,10 +30,10 @@ if (isset($_GET['csv'])) {
     header('Content-Disposition: attachment; filename="' . $datei . '"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF"); // BOM, damit Excel die Umlaute korrekt zeigt
-    fputcsv($out, ['Rang', 'Zeit', 'Name', 'Spielart', 'Stufe', 'Umfang', 'Fragen', 'Länder richtig', 'Hauptstädte richtig', 'Punkte', 'Max. Punkte', 'Prozent', 'Dauer (s)'], ';');
+    fputcsv($out, [t('Rang'), t('Zeit'), t('Name'), t('Spielart'), t('Stufe'), t('Umfang'), t('Fragen'), t('Länder richtig'), t('Hauptstädte richtig'), t('Punkte'), t('Max. Punkte'), t('Prozent'), t('Dauer (s)')], ';');
     foreach ($liste as $z) {
-        fputcsv($out, [$z['rang'], $z['zeit'], $z['name'], $z['spielart'] === 'umrisse' ? 'Umrisse' : 'Flaggen',
-            STUFEN[$z['stufe']] ?? '', modus_name($z['modus']), $z['anzahl'], $z['land_richtig'],
+        fputcsv($out, [$z['rang'], $z['zeit'], $z['name'], $z['spielart'] === 'umrisse' ? t('Umrisse') : t('Flaggen'),
+            isset(STUFEN[$z['stufe']]) ? t(STUFEN[$z['stufe']]) : '', modus_name($z['modus']), $z['anzahl'], $z['land_richtig'],
             $z['spielart'] === 'umrisse' ? '' : $z['haupt_richtig'],
             $z['punkte'], $z['max_punkte'], str_replace('.', ',', (string)$z['prozent']), $z['dauer_sek']], ';');
     }
@@ -54,32 +54,32 @@ foreach (db()->query('SELECT spielart, stufe, modus, COUNT(*) AS n FROM resultat
     }
 }
 
-kopf('Ergebnisse · Flaggenquiz Europa');
+kopf(t('Ergebnisse') . ' · ' . t('Flaggenquiz Europa'));
 ?>
 <header class="leiste">
-  <h1>Ergebnisse</h1>
-  <a class="knopf" href="index.php">Quiz starten</a>
+  <h1><?= h(t('Ergebnisse')) ?></h1>
+  <a class="knopf" href="index.php"><?= h(t('Quiz starten')) ?></a>
 </header>
 
-<nav class="tabs" aria-label="Spielart">
-  <a href="<?= h(link_zu(['spielart' => 'flaggen'])) ?>" class="<?= $spielart === 'flaggen' ? 'aktiv' : '' ?>">Flaggen <span><?= $zahl['flaggen'] ?></span></a>
-  <a href="<?= h(link_zu(['spielart' => 'umrisse', 'stufe' => $stufe ?: 'mittel'])) ?>" class="<?= $spielart === 'umrisse' ? 'aktiv' : '' ?>">Umrisse <span><?= $zahl['umrisse'] ?></span></a>
+<nav class="tabs" aria-label="<?= h(t('Spielart')) ?>">
+  <a href="<?= h(link_zu(['spielart' => 'flaggen'])) ?>" class="<?= $spielart === 'flaggen' ? 'aktiv' : '' ?>"><?= h(t('Flaggen')) ?> <span><?= $zahl['flaggen'] ?></span></a>
+  <a href="<?= h(link_zu(['spielart' => 'umrisse', 'stufe' => $stufe ?: 'mittel'])) ?>" class="<?= $spielart === 'umrisse' ? 'aktiv' : '' ?>"><?= h(t('Umrisse')) ?> <span><?= $zahl['umrisse'] ?></span></a>
 </nav>
 
 <div class="karte auswahl-leiste">
   <?php if ($spielart === 'umrisse'): ?>
   <div class="segment-gruppe">
-    <span class="segment-titel">Stufe</span>
-    <div class="segment" role="group" aria-label="Stufe">
+    <span class="segment-titel"><?= h(t('Stufe')) ?></span>
+    <div class="segment" role="group" aria-label="<?= h(t('Stufe')) ?>">
       <?php foreach (STUFEN as $s => $t): ?>
-        <a href="<?= h(link_zu(['stufe' => $s])) ?>" class="<?= $stufe === $s ? 'aktiv' : '' ?>"<?= $stufe === $s ? ' aria-current="true"' : '' ?>><?= $t ?> <span><?= $zahlStufe[$s] ?? 0 ?></span></a>
+        <a href="<?= h(link_zu(['stufe' => $s])) ?>" class="<?= $stufe === $s ? 'aktiv' : '' ?>"<?= $stufe === $s ? ' aria-current="true"' : '' ?>><?= h(t($t)) ?> <span><?= $zahlStufe[$s] ?? 0 ?></span></a>
       <?php endforeach; ?>
     </div>
   </div>
   <?php endif; ?>
   <div class="segment-gruppe">
-    <span class="segment-titel">Umfang</span>
-    <div class="segment" role="group" aria-label="Umfang">
+    <span class="segment-titel"><?= h(t('Umfang')) ?></span>
+    <div class="segment" role="group" aria-label="<?= h(t('Umfang')) ?>">
       <?php foreach (['kurz', 'komplett'] as $m): ?>
         <a href="<?= h(link_zu(['modus' => $m])) ?>" class="<?= $modus === $m ? 'aktiv' : '' ?>"<?= $modus === $m ? ' aria-current="true"' : '' ?>><?= modus_name($m) ?> <span><?= $zahlModus[$m] ?></span></a>
       <?php endforeach; ?>
@@ -89,17 +89,16 @@ kopf('Ergebnisse · Flaggenquiz Europa');
     <input type="hidden" name="spielart" value="<?= h($spielart) ?>">
     <?php if ($stufe !== ''): ?><input type="hidden" name="stufe" value="<?= h($stufe) ?>"><?php endif; ?>
     <input type="hidden" name="modus" value="<?= h($modus) ?>">
-    <input name="name" placeholder="Nach Name suchen" aria-label="Nach Name suchen" value="<?= h($filter) ?>">
-    <button type="submit">Suchen</button>
-    <?php if ($filter !== ''): ?><a class="sekundaer" href="<?= h(link_zu(['name' => ''])) ?>">Alle zeigen</a><?php endif; ?>
-    <a class="sekundaer" href="<?= h(link_zu(['csv' => 1])) ?>">CSV-Export</a>
+    <input name="name" placeholder="<?= h(t('Nach Name suchen')) ?>" aria-label="<?= h(t('Nach Name suchen')) ?>" value="<?= h($filter) ?>">
+    <button type="submit"><?= h(t('Suchen')) ?></button>
+    <?php if ($filter !== ''): ?><a class="sekundaer" href="<?= h(link_zu(['name' => ''])) ?>"><?= h(t('Alle zeigen')) ?></a><?php endif; ?>
+    <a class="sekundaer" href="<?= h(link_zu(['csv' => 1])) ?>"><?= h(t('CSV-Export')) ?></a>
   </form>
 </div>
 
-<h2 class="zwischentitel">Rangliste <?= h($kombi) ?></h2>
+<h2 class="zwischentitel"><?= h(t('Rangliste {kombi}', ['kombi' => $kombi])) ?></h2>
 <div class="karte tabelle-wrap">
   <?php rangliste_tabelle($liste, $spielart); ?>
 </div>
-<p class="klein">Jede Kombination aus Spielart, Stufe und Umfang hat eine eigene Rangliste.
-  Sortiert nach Prozent, bei Gleichstand zählt die schnellere Zeit.</p>
+<p class="klein"><?= h(t('Jede Kombination aus Spielart, Stufe und Umfang hat eine eigene Rangliste. Sortiert nach Prozent, bei Gleichstand zählt die schnellere Zeit.')) ?></p>
 <?php fuss();

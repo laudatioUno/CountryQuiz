@@ -14,3 +14,6 @@ const TIPPFEHLER_TOLERANZ = true;
 
 // Speicherort der SQLite-Datenbank (Ordner muss für PHP beschreibbar sein)
 const DB_DATEI = __DIR__ . '/data/resultate.sqlite';
+
+// Sprache, wenn weder der Browser noch eine frühere Wahl etwas anderes sagt: 'de' oder 'fr'
+const STANDARD_SPRACHE = 'de';

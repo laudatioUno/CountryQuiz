@@ -35,21 +35,34 @@ foreach ($codes as $c) {
     }
 }
 
-// Answer checking: every official name counts as correct; the name of another
-// country never counts at the flag of a different country
-foreach (LAENDER as $a => $daten) {
-    foreach ([0, 1] as $feld) {
-        foreach ($daten[$feld] as $name) {
-            pruefen(pruefe($name, $a, $feld) === 'richtig', "Nicht als richtig erkannt: $a «{$name}»");
-        }
-        $eigen = array_map('norm', array_merge($daten[$feld], TOLERIERT[$a][$feld] ?? []));
-        foreach (LAENDER as $b => $andere) {
-            if ($a === $b) {
-                continue;
+// Answer checking, for every language: every official name counts as correct; the name
+// of another country never counts at the flag of a different country
+foreach (array_keys(SPRACHEN) as $sp) {
+    sprache($sp);
+    $alleNamen = namen();
+    $alleToleriert = toleriert();
+    pruefen(array_keys($alleNamen) == $codes || count(array_diff($codes, array_keys($alleNamen))) === 0, "[$sp] Länderliste unvollständig");
+    foreach ($codes as $a) {
+        pruefen(!empty($alleNamen[$a][0][0]) && !empty($alleNamen[$a][1][0]), "[$sp] Name oder Hauptstadt fehlt: $a");
+        pruefen(loesung_land($a) !== '' && loesung_haupt($a) !== '', "[$sp] Lösung fehlt: $a");
+    }
+    foreach ($alleNamen as $a => $daten) {
+        foreach ([0, 1] as $feld) {
+            foreach ($daten[$feld] as $name) {
+                pruefen(pruefe($name, $a, $feld) === 'richtig', "[$sp] Nicht als richtig erkannt: $a «{$name}»");
             }
-            foreach (array_merge($andere[$feld], TOLERIERT[$b][$feld] ?? []) as $name) {
-                if (!in_array(norm($name), $eigen, true)) {
-                    pruefen(pruefe($name, $a, $feld) === 'falsch', "Anderes Land akzeptiert: Flagge $a, Eingabe «{$name}»");
+            foreach ($alleToleriert[$a][$feld] ?? [] as $name) {
+                pruefen(pruefe($name, $a, $feld) !== 'falsch', "[$sp] Tolerierte Antwort nicht akzeptiert: $a «{$name}»");
+            }
+            $eigen = array_map('norm', array_merge($daten[$feld], $alleToleriert[$a][$feld] ?? []));
+            foreach ($alleNamen as $b => $andere) {
+                if ($a === $b) {
+                    continue;
+                }
+                foreach (array_merge($andere[$feld], $alleToleriert[$b][$feld] ?? []) as $name) {
+                    if (!in_array(norm($name), $eigen, true)) {
+                        pruefen(pruefe($name, $a, $feld) === 'falsch', "[$sp] Anderes Land akzeptiert: Flagge $a, Eingabe «{$name}»");
+                    }
                 }
             }
         }
@@ -57,10 +70,51 @@ foreach (LAENDER as $a => $daten) {
 }
 
 // Examples from the tolerant checking
+sprache('de');
 foreach ([['li', 'Lichtenstein', 'tippfehler'], ['gb', 'Vereintes Königreich', 'tippfehler'], ['by', 'Weissrussland', 'richtig'],
           ['ba', 'Bosnien', 'tippfehler'], ['is', 'Irland', 'falsch'], ['sk', 'Slowenien', 'falsch'], ['gb', 'England', 'falsch']] as [$c, $e, $soll]) {
-    pruefen(pruefe($e, $c, 0) === $soll, "«{$e}» bei $c sollte $soll sein, ist " . pruefe($e, $c, 0));
+    pruefen(pruefe($e, $c, 0) === $soll, "[de] «{$e}» bei $c sollte $soll sein, ist " . pruefe($e, $c, 0));
 }
+sprache('fr');
+foreach ([['li', 'Lichtenstein', 'tippfehler'], ['gb', 'royaume uni', 'richtig'], ['by', 'Bielorussie', 'richtig'], ['ch', 'suisse', 'richtig'],
+          ['ba', 'Bosnie', 'tippfehler'], ['is', 'Irlande', 'falsch'], ['sk', 'Slovénie', 'falsch'], ['gb', 'Angleterre', 'falsch'],
+          ['de', 'Allemagne', 'richtig'], ['de', 'Deutschland', 'falsch'], ['nl', 'Pays Bas', 'richtig']] as [$c, $e, $soll]) {
+    pruefen(pruefe($e, $c, 0) === $soll, "[fr] «{$e}» bei $c sollte $soll sein, ist " . pruefe($e, $c, 0));
+}
+foreach ([['pl', 'Varsovie', 'richtig'], ['dk', 'Copenhage', 'tippfehler'], ['at', 'Wien', 'falsch'], ['ch', 'Berne', 'richtig']] as [$c, $e, $soll]) {
+    pruefen(pruefe($e, $c, 1) === $soll, "[fr] Hauptstadt «{$e}» bei $c sollte $soll sein, ist " . pruefe($e, $c, 1));
+}
+sprache('de');
+
+// Every text passed to t() has a translation in every language file
+$texte = [];
+foreach (array_merge(glob(__DIR__ . '/../*.php'), glob(__DIR__ . '/../lang/*.php')) as $datei) {
+    preg_match_all("/\\bt\\('((?:[^'\\\\]|\\\\.)*)'/", file_get_contents($datei), $m);
+    foreach ($m[1] as $text) {
+        $texte[stripslashes($text)] = true;
+    }
+}
+foreach (STUFEN as $stufe) {
+    $texte[$stufe] = true; // werden als t(STUFEN[...]) übersetzt
+}
+foreach (array_keys(SPRACHEN) as $sp) {
+    if ($sp === 'de') {
+        continue;
+    }
+    $uebersetzt = sprachpaket($sp)['texte'];
+    foreach (array_keys($texte) as $text) {
+        pruefen(isset($uebersetzt[$text]), "[$sp] Übersetzung fehlt: «{$text}»");
+    }
+    foreach ($uebersetzt as $de => $x) {
+        preg_match_all('/\{\w+\}/', $de, $soll);
+        preg_match_all('/\{\w+\}/', $x, $ist);
+        sort($soll[0]);
+        sort($ist[0]);
+        pruefen($soll[0] === $ist[0], "[$sp] Platzhalter stimmen nicht: «{$de}»");
+        pruefen(isset($texte[$de]), "[$sp] Übersetzung wird nicht verwendet: «{$de}»");
+    }
+}
+pruefen(count($texte) > 50, 'Zu wenige Texte gefunden (' . count($texte) . ') – Suchmuster prüfen');
 
 // Answer options: 4 different countries incl. the correct one, never the same set twice in a row
 foreach (['leicht', 'mittel'] as $stufe) {

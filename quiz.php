@@ -69,43 +69,43 @@ foreach ($q['antworten'] as $a) {
 }
 $beantwortet = count($q['antworten']);
 $max = $beantwortet * ($umrisse ? 1 : 2);
-$wort = $umrisse ? 'Land' : 'Flagge';
+
 
 function rueckmeldung(string $titel, string $eingabe, string $status, string $loesung): string
 {
     $cls = $status === 'richtig' ? 'ok' : ($status === 'tippfehler' ? 'tipp' : 'falsch');
     $icon = $status === 'richtig' ? '✓' : ($status === 'tippfehler' ? '≈' : '✗');
     $html = '<div class="feld ' . $cls . '"><span class="titel">' . h($titel) . '</span>'
-        . '<span class="ein"><b>' . $icon . '</b> ' . ($eingabe === '' ? '<em>keine Antwort</em>' : '<i>' . h($eingabe) . '</i>') . '</span>';
+        . '<span class="ein"><b>' . $icon . '</b> ' . ($eingabe === '' ? '<em>' . h(t('keine Antwort')) . '</em>' : '<i>' . h($eingabe) . '</i>') . '</span>';
     if ($status !== 'richtig') {
-        $html .= '<span class="soll">' . ($status === 'tippfehler' ? 'Zählt als richtig. Korrekt heisst es: ' : 'Richtig: ') . h($loesung) . '</span>';
+        $html .= '<span class="soll">' . ($status === 'tippfehler' ? t('Zählt als richtig. Korrekt heisst es:') . ' ' : t('Richtig:') . ' ') . h($loesung) . '</span>';
     }
     return $html . '</div>';
 }
 
-kopf('Flaggenquiz Europa');
+kopf(t('Flaggenquiz Europa'));
 ?>
 <header class="leiste">
-  <h1>Flaggenquiz</h1>
+  <h1><?= h(t('Flaggenquiz')) ?></h1>
   <span><?= h($q['name']) ?> · <?= h(kombi_name($spielart, $stufe, $q['modus'])) ?></span>
 </header>
 
 <div class="fortschritt">
-  <span><?= $wort ?> <strong><?= $pos + 1 ?></strong> von <?= $n ?></span>
-  <span>Punkte: <strong><?= $punkte ?></strong> / <?= $max ?></span>
+  <span><?php $w = ['nr' => '<strong>' . ($pos + 1) . '</strong>', 'n' => $n]; ?><?= $umrisse ? t('Land {nr} von {n}', $w) : t('Flagge {nr} von {n}', $w) ?></span>
+  <span><?= h(t('Punkte')) ?>: <strong><?= $punkte ?></strong> / <?= $max ?></span>
 </div>
 <div class="balken"><span style="width: <?= round(($pos + ($antwort ? 1 : 0)) / $n * 100, 1) ?>%"></span></div>
 
 <section class="karte einzel">
 <?php if (!$umrisse): ?>
-  <img class="hauptbild" src="<?= h(flagge($code)) ?>" alt="Flagge Nr. <?= $pos + 1 ?>" draggable="false">
+  <img class="hauptbild" src="<?= h(flagge($code)) ?>" alt="<?= h(t('Flagge Nr. {nr}', ['nr' => $pos + 1])) ?>" draggable="false">
 <?php else: ?>
   <div class="umriss-bild<?= $karte ? ' karte-bild' : '' ?>">
-    <img src="<?= h(umriss($code)) ?>" alt="<?= $karte ? 'Kartenausschnitt mit markiertem Kleinstaat' : 'Umriss eines europäischen Landes' ?>" draggable="false">
-    <?php if ($karte): ?><span class="karten-chip">Kleinstaat · Lage auf der Karte</span><?php endif; ?>
+    <img src="<?= h(umriss($code)) ?>" alt="<?= h($karte ? t('Kartenausschnitt mit markiertem Kleinstaat') : t('Umriss eines europäischen Landes')) ?>" draggable="false">
+    <?php if ($karte): ?><span class="karten-chip"><?= h(t('Kleinstaat · Lage auf der Karte')) ?></span><?php endif; ?>
   </div>
   <?php if (!$antwort): ?>
-    <p class="frage-text"><?= $karte ? 'Welcher Staat liegt im roten Kreis?' : ($stufe === 'mittel' ? 'Welche Flagge gehört zu diesem Land?' : 'Welches Land ist das?') ?></p>
+    <p class="frage-text"><?= h($karte ? t('Welcher Staat liegt im roten Kreis?') : ($stufe === 'mittel' ? t('Welche Flagge gehört zu diesem Land?') : t('Welches Land ist das?'))) ?></p>
   <?php endif; ?>
 <?php endif; ?>
 
@@ -119,7 +119,7 @@ kopf('Flaggenquiz Europa');
       <div class="optionen <?= $stufe === 'mittel' ? 'flaggen-optionen' : '' ?>">
         <?php foreach ($q['optionen'][$pos] as $i => $opt): $buchstabe = chr(65 + $i); ?>
           <?php if ($stufe === 'mittel'): ?>
-            <button type="submit" name="wahl" value="<?= $i ?>" class="option" aria-label="Flagge <?= $buchstabe ?>">
+            <button type="submit" name="wahl" value="<?= $i ?>" class="option" aria-label="<?= h(t('Flagge {nr}', ['nr' => $buchstabe])) ?>">
               <span class="buchstabe"><?= $buchstabe ?></span>
               <img src="<?= h(flagge($opt)) ?>" alt="">
             </button>
@@ -130,7 +130,7 @@ kopf('Flaggenquiz Europa');
           <?php endif; ?>
         <?php endforeach; ?>
       </div>
-      <p class="hinweis">Antippen genügt – die Auswahl wird sofort geprüft.</p>
+      <p class="hinweis"><?= h(t('Antippen genügt – die Auswahl wird sofort geprüft.')) ?></p>
     </form>
 
   <?php elseif ($umrisse): ?>
@@ -138,10 +138,10 @@ kopf('Flaggenquiz Europa');
       <input type="hidden" name="token" value="<?= h($q['token']) ?>">
       <input type="hidden" name="pos" value="<?= $pos ?>">
       <input type="hidden" name="aktion" value="pruefen">
-      <label>Land
+      <label><?= h(t('Land')) ?>
         <input name="land" id="land" autofocus autocapitalize="words" spellcheck="false" autocorrect="off">
       </label>
-      <button type="submit">Prüfen</button>
+      <button type="submit"><?= h(t('Prüfen')) ?></button>
     </form>
 
   <?php else: ?>
@@ -149,13 +149,13 @@ kopf('Flaggenquiz Europa');
       <input type="hidden" name="token" value="<?= h($q['token']) ?>">
       <input type="hidden" name="pos" value="<?= $pos ?>">
       <input type="hidden" name="aktion" value="pruefen">
-      <label>Land
+      <label><?= h(t('Land')) ?>
         <input name="land" id="land" autofocus autocapitalize="words" spellcheck="false" autocorrect="off">
       </label>
-      <label>Hauptstadt
+      <label><?= h(t('Hauptstadt')) ?>
         <input name="haupt" id="haupt" autocapitalize="words" spellcheck="false" autocorrect="off">
       </label>
-      <button type="submit">Prüfen</button>
+      <button type="submit"><?= h(t('Prüfen')) ?></button>
     </form>
     <script>
     // Enter im Feld "Land" springt zur Hauptstadt, Enter in "Hauptstadt" prüft
@@ -173,7 +173,7 @@ kopf('Flaggenquiz Europa');
       $ungenau = $antwort['pl'] === 'tippfehler';
     ?>
     <p class="urteil <?= $ok ? 'ok' : 'falsch' ?>">
-      <?= $ok ? ($ungenau ? 'Richtig! Achte noch auf die Schreibweise.' : 'Richtig, super!') : 'Leider falsch.' ?>
+      <?= h($ok ? ($ungenau ? t('Richtig! Achte noch auf die Schreibweise.') : t('Richtig, super!')) : t('Leider falsch.')) ?>
     </p>
 
     <?php if ($auswahl): ?>
@@ -182,7 +182,7 @@ kopf('Flaggenquiz Europa');
           $istRichtig = $opt === $code;
           $istGewaehlt = $opt === $antwort['w'];
           $cls = $istRichtig ? 'opt-ok' : ($istGewaehlt ? 'opt-falsch' : 'opt-aus');
-          $zusatz = $istRichtig ? ($istGewaehlt ? 'richtig · deine Wahl' : 'richtig') : ($istGewaehlt ? 'deine Wahl' : '');
+          $zusatz = $istRichtig ? ($istGewaehlt ? t('richtig') . ' · ' . t('deine Wahl') : t('richtig')) : ($istGewaehlt ? t('deine Wahl') : '');
         ?>
           <div class="option <?= $cls ?>">
             <?php if ($istRichtig || $istGewaehlt): ?>
@@ -195,16 +195,16 @@ kopf('Flaggenquiz Europa');
             <?php endif; ?>
             <span class="opt-text">
               <span class="opt-name"><?= h(loesung_land($opt)) ?></span>
-              <?php if ($zusatz): ?><span class="opt-zusatz"><?= $zusatz ?></span><?php endif; ?>
+              <?php if ($zusatz): ?><span class="opt-zusatz"><?= h($zusatz) ?></span><?php endif; ?>
             </span>
           </div>
         <?php endforeach; ?>
       </div>
     <?php else: ?>
-      <?= rueckmeldung('Land', $antwort['l'], $antwort['pl'], loesung_land($code)) ?>
+      <?= rueckmeldung(t('Land'), $antwort['l'], $antwort['pl'], loesung_land($code)) ?>
     <?php endif; ?>
 
-    <p class="info-zeile">Gesucht war <strong><?= h(loesung_land($code)) ?></strong> – Hauptstadt <?= h(loesung_haupt($code)) ?>.</p>
+    <p class="info-zeile"><?= t('Gesucht war {land} – Hauptstadt {haupt}.', ['land' => '<strong>' . h(loesung_land($code)) . '</strong>', 'haupt' => h(loesung_haupt($code))]) ?></p>
 
   <?php else: ?>
     <?php
@@ -213,27 +213,27 @@ kopf('Flaggenquiz Europa');
       $ungenau = $antwort['pl'] === 'tippfehler' || $antwort['ph'] === 'tippfehler';
     ?>
     <p class="urteil <?= $alles ? 'ok' : ($nichts ? 'falsch' : 'halb') ?>">
-      <?= $alles ? ($ungenau ? 'Richtig! Achte noch auf die Schreibweise.' : 'Richtig, super!') : ($nichts ? 'Leider falsch.' : 'Teilweise richtig.') ?>
+      <?= h($alles ? ($ungenau ? t('Richtig! Achte noch auf die Schreibweise.') : t('Richtig, super!')) : ($nichts ? t('Leider falsch.') : t('Teilweise richtig.'))) ?>
     </p>
-    <?= rueckmeldung('Land', $antwort['l'], $antwort['pl'], loesung_land($code)) ?>
-    <?= rueckmeldung('Hauptstadt', $antwort['h'], $antwort['ph'], loesung_haupt($code)) ?>
+    <?= rueckmeldung(t('Land'), $antwort['l'], $antwort['pl'], loesung_land($code)) ?>
+    <?= rueckmeldung(t('Hauptstadt'), $antwort['h'], $antwort['ph'], loesung_haupt($code)) ?>
   <?php endif; ?>
 
   <?php if ($letzte): ?>
     <form method="post" action="auswertung.php">
       <input type="hidden" name="token" value="<?= h($q['token']) ?>">
-      <button type="submit" autofocus>Zur Auswertung</button>
+      <button type="submit" autofocus><?= h(t('Zur Auswertung')) ?></button>
     </form>
   <?php else: ?>
     <form method="post">
       <input type="hidden" name="token" value="<?= h($q['token']) ?>">
       <input type="hidden" name="aktion" value="weiter">
-      <button type="submit" autofocus><?= $umrisse ? 'Nächstes Land' : 'Nächste Flagge' ?> →</button>
+      <button type="submit" autofocus><?= h($umrisse ? t('Nächstes Land') : t('Nächste Flagge')) ?> →</button>
     </form>
   <?php endif; ?>
 
 <?php endif; ?>
 </section>
 
-<p class="klein"><a href="index.php" onclick="return confirm('Quiz abbrechen? Es wird nichts gespeichert.')">Quiz abbrechen</a></p>
+<p class="klein"><a href="index.php" onclick="return confirm(<?= h(json_encode(t('Quiz abbrechen? Es wird nichts gespeichert.'), JSON_UNESCAPED_UNICODE)) ?>)"><?= h(t('Quiz abbrechen')) ?></a></p>
 <?php fuss();

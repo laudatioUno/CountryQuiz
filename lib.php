@@ -8,6 +8,105 @@ date_default_timezone_set('Europe/Zurich');
 session_name('flaggenquiz');
 session_start();
 
+/*
+ * ---- Sprache ----
+ * Deutsch ist die Grundsprache: alle Texte stehen deutsch im Code und werden mit t()
+ * übersetzt. Die Übersetzungen und die Länder-/Hauptstadtnamen einer weiteren Sprache
+ * stehen in lang/<code>.php.
+ */
+const SPRACHEN = ['de' => 'Deutsch', 'fr' => 'Français'];
+
+/**
+ * Aktuelle Sprache: ?lang=… (wird gemerkt) › Cookie › Browser-Sprache › STANDARD_SPRACHE
+ * Mit $setzen lässt sie sich fest einstellen (z. B. im Selbsttest).
+ */
+function sprache(?string $setzen = null): string
+{
+    static $sprache = null;
+    if ($setzen !== null && isset(SPRACHEN[$setzen])) {
+        return $sprache = $setzen;
+    }
+    if ($sprache !== null) {
+        return $sprache;
+    }
+    $wahl = $_GET['lang'] ?? null;
+    if (is_string($wahl) && isset(SPRACHEN[$wahl])) {
+        if (!headers_sent()) {
+            setcookie('sprache', $wahl, ['expires' => time() + 365 * 86400, 'path' => '/', 'samesite' => 'Lax']);
+        }
+        return $sprache = $wahl;
+    }
+    $cookie = $_COOKIE['sprache'] ?? null;
+    if (is_string($cookie) && isset(SPRACHEN[$cookie])) {
+        return $sprache = $cookie;
+    }
+    // Browser-Sprache, z. B. "fr-CH,fr;q=0.9,de;q=0.8"
+    foreach (explode(',', (string)($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '')) as $teil) {
+        $code = strtolower(substr(trim($teil), 0, 2));
+        if (isset(SPRACHEN[$code])) {
+            return $sprache = $code;
+        }
+    }
+    $standard = defined('STANDARD_SPRACHE') ? STANDARD_SPRACHE : 'de';
+    return $sprache = isset(SPRACHEN[$standard]) ? $standard : 'de';
+}
+
+/** Inhalt von lang/<sprache>.php (leer für Deutsch). */
+function sprachpaket(?string $sprache = null): array
+{
+    static $pakete = [];
+    $sprache = $sprache ?? sprache();
+    if ($sprache === 'de') {
+        return [];
+    }
+    return $pakete[$sprache] ??= require __DIR__ . '/lang/' . $sprache . '.php';
+}
+
+/**
+ * Übersetzt einen deutschen Text in die aktuelle Sprache.
+ * Platzhalter wie {n} werden durch $werte['n'] ersetzt.
+ */
+function t(string $text, array $werte = []): string
+{
+    $uebersetzt = sprachpaket()['texte'][$text] ?? $text;
+    foreach ($werte as $k => $v) {
+        $uebersetzt = str_replace('{' . $k . '}', (string)$v, $uebersetzt);
+    }
+    return $uebersetzt;
+}
+
+/** Länder- und Hauptstadtnamen der aktuellen Sprache (für Anzeige und Antwortprüfung). */
+function namen(?string $sprache = null): array
+{
+    return ($sprache ?? sprache()) === 'de' ? LAENDER : sprachpaket($sprache)['laender'];
+}
+
+/** Ungenaue, aber zugelassene Antworten der aktuellen Sprache. */
+function toleriert(?string $sprache = null): array
+{
+    return ($sprache ?? sprache()) === 'de' ? TOLERIERT : (sprachpaket($sprache)['toleriert'] ?? []);
+}
+
+/** Link auf die aktuelle Seite mit geänderten/zusätzlichen Parametern. */
+function link_hier(array $param): string
+{
+    $pfad = strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?') ?: 'index.php';
+    $query = array_merge($_GET, $param);
+    return basename($pfad) . '?' . http_build_query($query);
+}
+
+/** Sprachumschalter (Links). */
+function sprachwahl(): string
+{
+    $html = '<nav class="sprachwahl" aria-label="' . h(t('Sprache')) . '">';
+    foreach (SPRACHEN as $code => $name) {
+        $html .= $code === sprache()
+            ? '<span aria-current="true" lang="' . $code . '">' . h($name) . '</span>'
+            : '<a href="' . h(link_hier(['lang' => $code])) . '" lang="' . $code . '" hreflang="' . $code . '">' . h($name) . '</a>';
+    }
+    return $html . '</nav>';
+}
+
 /**
  * Länderdaten: Code => [Land (offiziell angezeigt), Hauptstadt, [erlaubte Ländernamen], [erlaubte Hauptstädte]]
  * Der erste Eintrag jeder Liste ist die Musterlösung. Umlaute, Akzente,
@@ -288,13 +387,17 @@ const STUFEN = ['leicht' => 'Leicht', 'mittel' => 'Mittel', 'schwer' => 'Schwer'
 function kombi_name(string $spielart, string $stufe, string $modus): string
 {
     return $spielart === 'umrisse'
-        ? 'Umrisse · ' . (STUFEN[$stufe] ?? $stufe) . ' · ' . modus_name($modus)
-        : 'Flaggen · ' . modus_name($modus);
+        ? t('Umrisse') . ' · ' . t(STUFEN[$stufe] ?? $stufe) . ' · ' . modus_name($modus)
+        : t('Flaggen') . ' · ' . modus_name($modus);
 }
 
 /** Anzeige der Musterlösung (inkl. Alternativname, wo sinnvoll). */
 function loesung_land(string $code): string
 {
+    if (sprache() !== 'de') {
+        $p = sprachpaket();
+        return $p['anzeige_land'][$code] ?? $p['laender'][$code][0][0];
+    }
     $l = LAENDER[$code][0];
     return match ($code) {
         'by' => 'Belarus (Weissrussland)',
@@ -305,6 +408,10 @@ function loesung_land(string $code): string
 
 function loesung_haupt(string $code): string
 {
+    if (sprache() !== 'de') {
+        $p = sprachpaket();
+        return $p['anzeige_haupt'][$code] ?? $p['laender'][$code][1][0];
+    }
     return match ($code) {
         'ua' => 'Kiew (Kyjiw)',
         'ch' => 'Bern (Bundesstadt)',
@@ -476,8 +583,10 @@ function pruefe(string $eingabe, string $code, int $feld): string
     if ($e === '') {
         return 'falsch';
     }
-    $offiziell = LAENDER[$code][$feld];
-    $toleriert = TOLERIERT[$code][$feld] ?? [];
+    $alleNamen = namen();
+    $alleToleriert = toleriert();
+    $offiziell = $alleNamen[$code][$feld];
+    $toleriert = $alleToleriert[$code][$feld] ?? [];
 
     foreach ($offiziell as $a) {
         if ($e === norm($a)) {
@@ -487,11 +596,11 @@ function pruefe(string $eingabe, string $code, int $feld): string
 
     // Ist die Eingabe der Name eines anderen Landes / einer anderen Hauptstadt? Dann falsch.
     $andere = [];
-    foreach (LAENDER as $c => $daten) {
+    foreach ($alleNamen as $c => $daten) {
         if ($c === $code) {
             continue;
         }
-        $namen = array_merge($daten[$feld], TOLERIERT[$c][$feld] ?? []);
+        $namen = array_merge($daten[$feld], $alleToleriert[$c][$feld] ?? []);
         // gleicher Name wie die eigene Lösung (z. B. Rom beim Vatikan) nicht als "anderes" werten
         $namen = array_filter($namen, function ($n) use ($offiziell, $toleriert) {
             foreach (array_merge($offiziell, $toleriert) as $eigen) {
@@ -520,7 +629,8 @@ function pruefe(string $eingabe, string $code, int $feld): string
     }
 
     // Ähnlichkeit zur richtigen Lösung …
-    $ep = koelner($eingabe);
+    // Der Lautvergleich (Kölner Phonetik) folgt deutschen Ausspracheregeln: nur auf Deutsch
+    $ep = sprache() === 'de' ? koelner($eingabe) : '';
     $dEigen = abstand($e, $ep, array_merge($offiziell, $toleriert));
     if ($dEigen === null) {
         return 'falsch';
@@ -606,7 +716,7 @@ function db_update(): string
         // Zuerst alles aus dem Zwischenspeicher in die Datei schreiben, dann kopieren
         $pdo->exec('PRAGMA wal_checkpoint(TRUNCATE)');
         if (!copy(DB_DATEI, $sicherung)) {
-            throw new RuntimeException('Sicherungskopie konnte nicht angelegt werden (Ordner data/ beschreibbar?).');
+            throw new RuntimeException(t('Sicherungskopie konnte nicht angelegt werden (Ordner data/ beschreibbar?).'));
         }
     }
 
@@ -641,7 +751,7 @@ function dauer(int $s): string
 
 function modus_name(string $modus): string
 {
-    return $modus === 'kurz' ? 'Kurz' : 'Komplett';
+    return $modus === 'kurz' ? t('Kurz') : t('Komplett');
 }
 
 /**
@@ -680,16 +790,18 @@ function rangliste(string $spielart, string $stufe, string $modus): array
 }
 
 /** Gibt eine Ranglisten-Tabelle aus; die Zeile mit $markiert wird hervorgehoben. */
-function rangliste_tabelle(array $zeilen, string $spielart, ?int $markiert = null, string $badge = 'neu'): void
+function rangliste_tabelle(array $zeilen, string $spielart, ?int $markiert = null, string $badge = ''): void
 {
     if (!$zeilen) {
-        echo '<p class="leer">Noch keine Ergebnisse.</p>';
+        echo '<p class="leer">' . h(t('Noch keine Ergebnisse.')) . '</p>';
         return;
     }
+    $badge = $badge !== '' ? $badge : t('neu');
     $umrisse = $spielart === 'umrisse';
-    echo '<table class="liste"><thead><tr><th class="r">Rang</th><th>Name</th>'
-        . ($umrisse ? '<th>Richtig</th>' : '<th>Länder</th><th>Hauptstädte</th><th>Punkte</th>')
-        . '<th class="r">%</th><th>Dauer</th><th>Datum</th><th></th></tr></thead><tbody>';
+    echo '<table class="liste"><thead><tr><th class="r">' . h(t('Rang')) . '</th><th>' . h(t('Name')) . '</th>'
+        . ($umrisse ? '<th>' . h(t('Richtig')) . '</th>'
+            : '<th>' . h(t('Länder')) . '</th><th>' . h(t('Hauptstädte')) . '</th><th>' . h(t('Punkte')) . '</th>')
+        . '<th class="r">%</th><th>' . h(t('Dauer')) . '</th><th>' . h(t('Datum')) . '</th><th></th></tr></thead><tbody>';
     foreach ($zeilen as $z) {
         $m = $markiert !== null && (int)$z['id'] === $markiert;
         $medaille = ['', '🥇', '🥈', '🥉'][(int)$z['rang']] ?? '';
@@ -704,7 +816,7 @@ function rangliste_tabelle(array $zeilen, string $spielart, ?int $markiert = nul
             . '<td class="r"><strong>' . number_format((float)$z['prozent'], 1, '.', '') . '</strong></td>'
             . '<td>' . h(dauer((int)$z['dauer_sek'])) . '</td>'
             . '<td>' . h(date('d.m.Y H:i', strtotime($z['zeit']))) . '</td>'
-            . '<td><a href="auswertung.php?id=' . (int)$z['id'] . '">Details</a></td>'
+            . '<td><a href="auswertung.php?id=' . (int)$z['id'] . '">' . h(t('Details')) . '</a></td>'
             . '</tr>';
     }
     echo '</tbody></table>';
@@ -712,7 +824,7 @@ function rangliste_tabelle(array $zeilen, string $spielart, ?int $markiert = nul
 
 function kopf(string $titel): void
 {
-    echo '<!doctype html><html lang="de-CH"><head><meta charset="utf-8">'
+    echo '<!doctype html><html lang="' . (sprache() === 'fr' ? 'fr-CH' : 'de-CH') . '"><head><meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1">'
         . '<title>' . h($titel) . '</title><link rel="stylesheet" href="style.css"></head><body><main>';
 }
@@ -720,6 +832,7 @@ function kopf(string $titel): void
 function fuss(): void
 {
     echo '</main><footer class="app-footer">'
+        . sprachwahl()
         . '<a href="https://github.com/laudatioUno/CountryQuiz/releases" rel="noopener">CountryQuiz ' . h(APP_VERSION) . '</a>'
         . '</footer></body></html>';
 }
