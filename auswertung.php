@@ -63,39 +63,39 @@ foreach ($liste as $z) {
 $eigenes = in_array($id, $_SESSION['meine'] ?? [], true);
 $details = json_decode($r['details'], true);
 $p = (float)$r['prozent'];
-$lob = $p >= 95 ? 'Hervorragend!' : ($p >= 80 ? 'Sehr gut!' : ($p >= 60 ? 'Gut gemacht, weiter üben!' : 'Da geht noch mehr, übe die roten Felder nochmals.'));
+$lob = $p >= 95 ? t('Hervorragend!') : ($p >= 80 ? t('Sehr gut!') : ($p >= 60 ? t('Gut gemacht, weiter üben!') : t('Da geht noch mehr, übe die roten Felder nochmals.')));
 
 function zelle(string $eingabe, string $status, string $loesung): string
 {
     $cls = $status === 'richtig' ? 'ok' : ($status === 'tippfehler' ? 'tipp' : 'falsch');
-    $eingabe = $eingabe === '' ? '<em>leer</em>' : h($eingabe);
+    $eingabe = $eingabe === '' ? '<em>' . h(t('leer')) . '</em>' : h($eingabe);
     $html = '<td class="' . $cls . '"><span class="ein">' . $eingabe . '</span>';
     if ($status !== 'richtig') {
-        $html .= '<span class="soll">' . ($status === 'tippfehler' ? 'korrekt: ' : '') . h($loesung) . '</span>';
+        $html .= '<span class="soll">' . ($status === 'tippfehler' ? t('korrekt:') . ' ' : '') . h($loesung) . '</span>';
     }
     return $html . '</td>';
 }
 
-kopf('Auswertung · Flaggenquiz Europa');
+kopf(t('Auswertung') . ' · ' . t('Flaggenquiz Europa'));
 ?>
 <header class="leiste">
-  <h1>Auswertung <span class="kombi-chip"><?= h($kombi) ?></span></h1>
+  <h1><?= h(t('Auswertung')) ?> <span class="kombi-chip"><?= h($kombi) ?></span></h1>
   <span><?= h($r['name']) ?> · <?= h(date('d.m.Y H:i', strtotime($r['zeit']))) ?></span>
 </header>
 
 <section class="karte bilanz">
-  <div class="gross"><?= (int)$r['punkte'] ?> / <?= (int)$r['max_punkte'] ?> <small>Punkte</small></div>
+  <div class="gross"><?= (int)$r['punkte'] ?> / <?= (int)$r['max_punkte'] ?> <small><?= h(t('Punkte')) ?></small></div>
   <div class="balken"><span style="width: <?= $p ?>%"></span></div>
   <p class="lob"><?= h($lob) ?></p>
   <dl>
     <?php if ($umrisse): ?>
-    <div><dt>Länder erkannt</dt><dd><?= (int)$r['land_richtig'] ?> / <?= (int)$r['anzahl'] ?></dd></div>
+    <div><dt><?= h(t('Länder erkannt')) ?></dt><dd><?= (int)$r['land_richtig'] ?> / <?= (int)$r['anzahl'] ?></dd></div>
     <?php else: ?>
-    <div><dt>Länder</dt><dd><?= (int)$r['land_richtig'] ?> / <?= (int)$r['anzahl'] ?></dd></div>
-    <div><dt>Hauptstädte</dt><dd><?= (int)$r['haupt_richtig'] ?> / <?= (int)$r['anzahl'] ?></dd></div>
+    <div><dt><?= h(t('Länder')) ?></dt><dd><?= (int)$r['land_richtig'] ?> / <?= (int)$r['anzahl'] ?></dd></div>
+    <div><dt><?= h(t('Hauptstädte')) ?></dt><dd><?= (int)$r['haupt_richtig'] ?> / <?= (int)$r['anzahl'] ?></dd></div>
     <?php endif; ?>
-    <div><dt>Ergebnis</dt><dd><?= number_format($p, 1, '.', '') ?> %</dd></div>
-    <div><dt>Zeit</dt><dd><?= h(dauer((int)$r['dauer_sek'])) ?></dd></div>
+    <div><dt><?= h(t('Ergebnis')) ?></dt><dd><?= number_format($p, 1, '.', '') ?> %</dd></div>
+    <div><dt><?= h(t('Zeit')) ?></dt><dd><?= h(dauer((int)$r['dauer_sek'])) ?></dd></div>
   </dl>
 </section>
 
@@ -103,12 +103,12 @@ kopf('Auswertung · Flaggenquiz Europa');
   <div class="platz">
     <span class="platz-nr"><?= $platz ?>.</span>
     <span>
-      <strong><?= $eigenes ? 'Dein Platz' : 'Platz' ?> von <?= count($liste) ?></strong>
-      <small>Rangliste «<?= h($kombi) ?>» · sortiert nach Prozent, bei Gleichstand zählt die schnellere Zeit</small>
+      <strong><?= h($eigenes ? t('Dein Platz von {n}', ['n' => count($liste)]) : t('Platz von {n}', ['n' => count($liste)])) ?></strong>
+      <small><?= h(t('Rangliste «{kombi}» · sortiert nach Prozent, bei Gleichstand zählt die schnellere Zeit', ['kombi' => $kombi])) ?></small>
     </span>
   </div>
   <div class="rang-scroll" id="rang-scroll">
-    <?php rangliste_tabelle($liste, $r['spielart'], $id, $eigenes ? 'du' : 'dieses'); ?>
+    <?php rangliste_tabelle($liste, $r['spielart'], $id, $eigenes ? t('du') : t('dieses')); ?>
   </div>
 </section>
 <script>
@@ -119,11 +119,11 @@ kopf('Auswertung · Flaggenquiz Europa');
 })();
 </script>
 
-<h2 class="zwischentitel"><?= $eigenes ? 'Deine Antworten' : 'Antworten' ?></h2>
+<h2 class="zwischentitel"><?= h($eigenes ? t('Deine Antworten') : t('Antworten')) ?></h2>
 <div class="karte tabelle-wrap">
 <table class="auswertung">
   <?php if ($umrisse): ?>
-  <thead><tr><th>#</th><th>Umriss</th><th>Gesucht</th><th><?= $eigenes ? 'Deine Antwort' : 'Antwort' ?></th></tr></thead>
+  <thead><tr><th>#</th><th><?= h(t('Umriss')) ?></th><th><?= h(t('Gesucht')) ?></th><th><?= h($eigenes ? t('Deine Antwort') : t('Antwort')) ?></th></tr></thead>
   <tbody>
   <?php foreach ($details as $i => $d): ?>
     <tr>
@@ -144,7 +144,7 @@ kopf('Auswertung · Flaggenquiz Europa');
   <?php endforeach; ?>
   </tbody>
   <?php else: ?>
-  <thead><tr><th>#</th><th>Flagge</th><th>Land</th><th>Hauptstadt</th></tr></thead>
+  <thead><tr><th>#</th><th><?= h(t('Flagge')) ?></th><th><?= h(t('Land')) ?></th><th><?= h(t('Hauptstadt')) ?></th></tr></thead>
   <tbody>
   <?php foreach ($details as $i => $d): ?>
     <tr>
@@ -160,7 +160,7 @@ kopf('Auswertung · Flaggenquiz Europa');
 </div>
 
 <div class="abschluss">
-  <a class="sekundaer" href="ergebnisse.php?spielart=<?= h($r['spielart']) ?>&amp;stufe=<?= h($r['stufe']) ?>&amp;modus=<?= h($r['modus']) ?>">Alle Ergebnisse</a>
-  <a class="knopf" href="index.php">Nochmals üben</a>
+  <a class="sekundaer" href="ergebnisse.php?spielart=<?= h($r['spielart']) ?>&amp;stufe=<?= h($r['stufe']) ?>&amp;modus=<?= h($r['modus']) ?>"><?= h(t('Alle Ergebnisse')) ?></a>
+  <a class="knopf" href="index.php"><?= h(t('Nochmals üben')) ?></a>
 </div>
 <?php fuss();

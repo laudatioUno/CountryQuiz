@@ -10,13 +10,13 @@ $sicherung = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && update_noetig()) {
     if (!hash_equals($_SESSION['update_token'] ?? '', (string)($_POST['token'] ?? ''))) {
-        $fehler = 'Die Seite war zu lange offen. Bitte nochmals auf GO klicken.';
+        $fehler = t('Die Seite war zu lange offen. Bitte nochmals auf GO klicken.');
     } else {
         try {
             $sicherung = db_update();
             unset($_SESSION['update_token']);
         } catch (Throwable $e) {
-            $fehler = 'Das Update hat nicht geklappt: ' . $e->getMessage();
+            $fehler = t('Das Update hat nicht geklappt:') . ' ' . $e->getMessage();
         }
     }
 }
@@ -32,24 +32,22 @@ if (update_noetig()) {
     $anzahl = (int)db()->query('SELECT COUNT(*) FROM resultate')->fetchColumn();
 }
 
-kopf('Update · Flaggenquiz Europa');
+kopf(t('Update') . ' · ' . t('Flaggenquiz Europa'));
 ?>
 <section class="karte start update">
 <?php if ($sicherung !== null): ?>
-  <h1>Update erledigt</h1>
-  <p>Die Datenbank ist jetzt auf dem neuesten Stand. Alle bisherigen Resultate sind erhalten und
-     erscheinen in der Rangliste «Flaggen».</p>
+  <h1><?= h(t('Update erledigt')) ?></h1>
+  <p><?= h(t('Die Datenbank ist jetzt auf dem neuesten Stand. Alle bisherigen Resultate sind erhalten und erscheinen in der Rangliste «Flaggen».')) ?></p>
   <?php if ($sicherung !== ''): ?>
-    <p class="klein-links">Sicherungskopie: <code>data/<?= h($sicherung) ?></code></p>
+    <p class="klein-links"><?= h(t('Sicherungskopie:')) ?> <code>data/<?= h($sicherung) ?></code></p>
   <?php endif; ?>
-  <a class="knopf" href="index.php">Weiter zum Quiz</a>
+  <a class="knopf" href="index.php"><?= h(t('Weiter zum Quiz')) ?></a>
 <?php else: ?>
-  <h1>Update nötig</h1>
-  <p>Für die neue Spielart «Umrisse» braucht die Datenbank zwei zusätzliche Angaben
-     (Spielart und Stufe). Das dauert nur einen Moment.</p>
+  <h1><?= h(t('Update nötig')) ?></h1>
+  <p><?= h(t('Für die neue Spielart «Umrisse» braucht die Datenbank zwei zusätzliche Angaben (Spielart und Stufe). Das dauert nur einen Moment.')) ?></p>
   <ul class="update-liste">
-    <li>Vorher wird automatisch eine Sicherungskopie angelegt.</li>
-    <li>Die <?= $anzahl ?> bisherigen Resultate bleiben erhalten (als Spielart «Flaggen»).</li>
+    <li><?= h(t('Vorher wird automatisch eine Sicherungskopie angelegt.')) ?></li>
+    <li><?= h(t('Die {n} bisherigen Resultate bleiben erhalten (als Spielart «Flaggen»).', ['n' => $anzahl])) ?></li>
   </ul>
   <?php if ($fehler): ?><p class="meldung"><?= h($fehler) ?></p><?php endif; ?>
   <form method="post">

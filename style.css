@@ -318,3 +318,11 @@ button.option:hover { border-color: var(--akzent); background: var(--akzent-hell
 .app-footer { text-align: center; padding: 0 16px 28px; font-size: .8rem; }
 .app-footer a { color: var(--leise); text-decoration: none; }
 .app-footer a:hover { color: var(--text); text-decoration: underline; }
+
+/* ---- Sprachwahl ---- */
+.oben-rechts { display: flex; justify-content: flex-end; }
+.sprachwahl { display: inline-flex; gap: 4px; padding: 3px; border-radius: 99px; background: var(--karte); border: 1px solid var(--linie); font-size: .85rem; }
+.sprachwahl a, .sprachwahl span { padding: 4px 12px; border-radius: 99px; text-decoration: none; color: var(--text); }
+.sprachwahl span[aria-current] { background: var(--akzent); color: #fff; font-weight: 600; }
+.sprachwahl a:hover { background: var(--akzent-hell); }
+.app-footer { display: flex; flex-direction: column; align-items: center; gap: 10px; }

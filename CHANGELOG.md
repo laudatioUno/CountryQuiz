@@ -3,6 +3,17 @@
 All notable changes to CountryQuiz. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.1.0] – 2026-10
+
+### Added
+- French: the whole quiz is available in French (Suisse romande) – all texts, country and capital names, answer checking with French alternative names (Bélarus, République tchèque, Grande-Bretagne, Kyiv …) and tolerated near-misses (Bosnie, Hollande, Macédoine).
+- Language switch Deutsch / Français at the top of the start page and in the footer of every page. The choice is remembered (cookie); on the first visit the browser language decides. Default language in `config.php` (`STANDARD_SPRACHE`).
+- Self test checks every language: names, answer checking against all other countries, and that every text has a translation.
+
+### Changed
+- Words that sound the same (e.g. «Lichtenstein») are only matched phonetically in German, because the rules are German; in French, typos are still tolerated.
+- Rankings are shared by both languages.
+
 ## [1.0.0] – 2026-10
 
 First version: an online exercise for the 46 countries of Europe – flags, capitals and outlines.

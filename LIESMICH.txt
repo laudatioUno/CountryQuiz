@@ -109,6 +109,16 @@ Einzelne Einträge löschen: data/resultate.sqlite mit einem SQLite-Programm
 zurückzusetzen.
 
 
+SPRACHE
+-------
+Das Quiz gibt es auf Deutsch und Französisch. Umschalten oben auf der
+Startseite oder unten auf jeder Seite; die Wahl wird im Browser gemerkt.
+Beim ersten Besuch entscheidet die Sprache des Browsers, sonst gilt
+STANDARD_SPRACHE in config.php. Die Ranglisten sind für beide Sprachen gleich.
+Französische Texte und Länder-/Hauptstadtnamen: lang/fr.php.
+Auf Französisch werden Tippfehler toleriert, der Lautvergleich
+("Lichtenstein") gilt nur auf Deutsch.
+
 UPDATE VON EINER ÄLTEREN VERSION
 --------------------------------
 1. Alle Dateien hochladen und bestehende überschreiben.

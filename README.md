@@ -1,7 +1,7 @@
 # CountryQuiz
 
 Quiz to learn countries, flags and outlines – the 46 countries of Europe with their capitals.
-Made for exam preparation at school (7th grade): pupils practise on their phone or computer, one question at a time, with immediate feedback and the correction. The user interface is in German.
+Made for exam preparation at school (7th grade): pupils practise on their phone or computer, one question at a time, with immediate feedback and the correction. The quiz is available in **German and French**; pupils switch the language on the start page or in the footer.
 
 ## Features
 
@@ -16,6 +16,7 @@ Made for exam preparation at school (7th grade): pupils practise on their phone 
 - *Kurz* (15 random countries) or *Komplett* (all 46)
 - Results stored in SQLite; evaluation at the end with the place in the ranking
 - Public rankings per game type, level and length, top 5 on the start page, CSV export
+- German and French, including country and capital names and the answer checking; the choice is remembered, the browser language decides on the first visit
 - No login, no external services, no JavaScript framework
 
 ## Requirements
@@ -31,7 +32,7 @@ Made for exam preparation at school (7th grade): pupils practise on their phone 
 3. Make sure `data/` is writable for PHP. The database is created with the first result.
 4. Open the site in the browser.
 
-Settings (number of countries in *Kurz*, tolerant checking on/off, database path) are in `config.php`.
+Settings (number of countries in *Kurz*, tolerant checking on/off, default language, database path) are in `config.php`.
 A detailed guide in German is in [LIESMICH.txt](LIESMICH.txt).
 
 ## Update
@@ -49,6 +50,12 @@ If you changed `config.php`, apply your changes again after uploading.
 3. Manually, if ever needed: **Actions › Release › Run workflow** with the version (e.g. `1.1.0`).
 
 Every pull request gets a test ZIP: **Checks › CI › Summary › Artifacts**.
+
+## Adding a language
+
+1. Copy `lang/fr.php` to `lang/<code>.php` (e.g. `it`) and translate the texts (`texte`), the country and capital names (`laender`, the first name is the solution, further names count as correct as well) and the tolerated near-misses (`toleriert`).
+2. Add the language to `SPRACHEN` at the top of `lib.php`.
+3. Run `php tests/selftest.php`: it reports missing translations and names that would be accepted for the wrong country.
 
 ## Development
 
