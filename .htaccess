@@ -1,0 +1,15 @@
+# Keine Verzeichnisauflistung
+Options -Indexes
+
+# Datenbank-Dateien nie ausliefern
+<FilesMatch "\.(sqlite|sqlite3|db)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+DirectoryIndex index.php
