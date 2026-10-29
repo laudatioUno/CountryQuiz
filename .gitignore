@@ -1,0 +1,10 @@
+# Database and backups (created on the server)
+/data/*.sqlite
+/data/*.sqlite-journal
+/data/*.sqlite-wal
+/data/*.sqlite-shm
+
+# Release build
+/build/
+
+.DS_Store

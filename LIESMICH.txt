@@ -1,0 +1,141 @@
+FLAGGENQUIZ EUROPA (CountryQuiz)
+================================
+Die aktuelle Version steht unten auf jeder Seite (Datei version.php).
+Neue Versionen: https://github.com/laudatioUno/CountryQuiz/releases
+
+Online-Übung mit zwei Spielarten:
+- Flaggen: Flagge erkennen, Land und Hauptstadt eintippen.
+- Umrisse: Land an seinem Umriss erkennen, in drei Stufen
+  (Leicht: Land aus 4 Namen wählen, Mittel: passende Flagge aus 4 wählen,
+  Schwer: Land selbst schreiben).
+Jede Frage wird einzeln abgefragt und sofort korrigiert.
+46 Länder (wie auf dem Arbeitsblatt), wählbar "Kurz" (15 zufällige Flaggen)
+oder "Komplett". Nach jedem Durchgang gibt es eine Auswertung, und das
+Resultat wird mit Zeit und Punkten in einer SQLite-Datenbank gespeichert.
+
+
+VORAUSSETZUNGEN
+---------------
+- Webhoster mit PHP 8.0 oder neuer
+- PHP-Erweiterungen pdo_sqlite und mbstring (bei fast allen Hostern Standard)
+
+
+INSTALLATION
+------------
+1. countryquiz-<version>.zip von den Releases herunterladen, entpacken und
+   den Inhalt des Ordners "countryquiz" per FTP auf den Webspace laden
+   (z. B. ins Hauptverzeichnis der Domain).
+2. Der Ordner "data" muss für PHP beschreibbar sein (meist automatisch so;
+   sonst per FTP-Programm Rechte 755 oder 775 setzen).
+   Die Datenbank data/resultate.sqlite wird beim ersten Resultat
+   automatisch angelegt.
+3. Aufrufen:
+     Quiz für die Klasse:   https://deine-domain.ch/
+     Ergebnisse:            https://deine-domain.ch/ergebnisse.php
+                            (auch direkt über die Startseite erreichbar)
+
+Der Ordner "data" ist per .htaccess gegen Abruf geschützt (Apache).
+Läuft der Hoster mit nginx, kann man in config.php bei DB_DATEI einen Pfad
+ausserhalb des öffentlichen Webordners angeben.
+
+
+DATEIEN
+-------
+index.php        Startseite: Name eingeben, Kurz oder Komplett wählen
+quiz.php         Eine Flagge nach der anderen: Land und Hauptstadt eingeben,
+                 sofort Rückmeldung (richtig/falsch) mit Korrektur, dann weiter
+update.php       Datenbank-Update (erscheint automatisch, wenn nötig)
+auswertung.php   Gesamtauswertung am Schluss, speichert das Resultat in der DB
+                 und zeigt den Platz in der Rangliste
+ergebnisse.php   Öffentliche Ranglisten (Kurz / Komplett), Suche nach Name,
+                 Details je Durchgang, CSV-Export für Excel
+version.php      Versionsnummer (wird in der Fusszeile angezeigt)
+lib.php          Länderdaten, Antwortprüfung, Datenbank
+config.php       Einstellungen
+style.css        Gestaltung
+flags/           Flaggen (SVG, neutrale Dateinamen)
+umrisse/         Länderumrisse bzw. Kartenausschnitte (SVG, neutrale Dateinamen)
+
+
+WAS ALS RICHTIG ZÄHLT
+---------------------
+Die Prüfung läuft in Stufen:
+
+1. Immer egal: Gross-/Kleinschreibung, Umlaute (ä = ae = a), Akzente,
+   Leerzeichen und Bindestriche. "bruessel", "Reykjavik", "Nord-Mazedonien"
+   zählen als richtig.
+2. Offizielle Zweitnamen gelten als richtig: Weissrussland, Moldawien,
+   Grossbritannien, Tschechische Republik, Vatikan, Kyjiw/Kiev, Prishtina ...
+3. Ungenaue Bezeichnungen zählen, die korrekte wird aber angezeigt:
+   Bosnien, Holland, Tschechei, Mazedonien, Vereintes Königreich ...
+   (Liste TOLERIERT in lib.php, beliebig erweiterbar)
+4. Tippfehler und gleich Klingendes zählen ebenfalls (mit Korrektur):
+   - je nach Wortlänge 1 bis 3 falsche/fehlende Buchstaben
+     (Wörter bis 3 Buchstaben wie "Rom" müssen stimmen)
+   - deutscher Lautvergleich (Kölner Phonetik): "Lichtenstein",
+     "Warshau", "Bukarescht", "Rejkjawik"
+   Abschalten: in config.php TIPPFEHLER_TOLERANZ = false.
+
+Schutz vor falschen Treffern: Ist die Eingabe der Name eines anderen
+Landes, oder passt sie mindestens so gut zu einem anderen Land, zählt sie
+als falsch. Beispiele: "Irland" bei der Flagge von Island, "Slowenien" bei
+der Slowakei, "Litauen" bei Lettland, "Schweden" bei der Schweiz.
+
+Bleiben falsch: England (nur ein Teil des Vereinigten Königreichs),
+Den Haag, Zürich, Rom beim Vatikan.
+
+Ergänzen: In lib.php bei LAENDER (zählt als richtig) oder TOLERIERT
+(zählt, mit Korrektur) einfach weitere Schreibweisen eintragen.
+
+Jedes Feld gibt 1 Punkt: Kurz = 30 Punkte, Komplett = 92 Punkte.
+
+
+DATENBANK
+---------
+Tabelle "resultate": id, zeit, name, modus, anzahl, land_richtig,
+haupt_richtig, punkte, max_punkte, prozent, dauer_sek, details (JSON mit
+allen Eingaben pro Flagge).
+
+
+RANGLISTE
+---------
+Kurz und Komplett haben je eine eigene Rangliste. Sortiert wird nach
+Prozent, bei Gleichstand gewinnt die schnellere Zeit. Die Startseite zeigt
+die Top 5 jedes Modus.
+
+Die Ergebnisse sind ohne Passwort für alle sichtbar, die den Link kennen.
+Einzelne Einträge löschen: data/resultate.sqlite mit einem SQLite-Programm
+öffnen (z. B. "DB Browser for SQLite"), oder die Datei löschen, um alles
+zurückzusetzen.
+
+
+UPDATE VON EINER ÄLTEREN VERSION
+--------------------------------
+1. Alle Dateien hochladen und bestehende überschreiben.
+   Den Ordner data/ mit der Datenbank NICHT löschen.
+2. Die Seite aufrufen: Es erscheint "Update nötig" mit dem Knopf GO.
+3. GO klicken. Vorher wird automatisch eine Sicherungskopie
+   (data/resultate-sicherung-DATUM.sqlite) angelegt. Die bisherigen
+   Resultate bleiben erhalten und zählen als Spielart "Flaggen".
+Solange das Update nicht gemacht ist, führt jede Seite zur Update-Seite.
+Bei einer neuen Installation ist kein Update nötig.
+
+Was das Update ändert: Die Tabelle "resultate" bekommt die Spalten
+"spielart" (flaggen/umrisse) und "stufe" (leicht/mittel/schwer).
+Die Versionsnummer steht in der Datenbank (PRAGMA user_version = 2).
+
+
+UMRISSE
+-------
+- 41 Länder als Umriss. Ferne Inseln und Überseegebiete sind weggelassen
+  (z. B. Frankreich ohne Guyana, Spanien ohne Kanaren).
+- Andorra, Liechtenstein, Monaco, San Marino und Vatikanstadt sind als Umriss
+  zu klein: sie erscheinen als Kartenausschnitt mit rot markierter Lage.
+- Leicht/Mittel: 1 richtige und 3 falsche Antworten. Die falschen kommen aus
+  einer Liste ähnlicher Länder (Nachbarn) bzw. ähnlicher Flaggen, eine davon
+  manchmal aus allen Ländern. Auswahl und Reihenfolge sind jedes Mal neu
+  gemischt; dieselbe Auswahl wie beim letzten Mal wird neu gezogen.
+  Die Listen (AEHNLICH_LAND, AEHNLICH_FLAGGE) stehen in lib.php.
+- Pro Land 1 Punkt. Jede Kombination aus Spielart, Stufe und Umfang hat eine
+  eigene Rangliste.
+- Kartendaten: Natural Earth (gemeinfrei), über das Paket world-atlas.
