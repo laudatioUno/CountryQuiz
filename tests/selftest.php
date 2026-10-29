@@ -94,8 +94,8 @@ foreach (array_merge(glob(__DIR__ . '/../*.php'), glob(__DIR__ . '/../lang/*.php
         $texte[stripslashes($text)] = true;
     }
 }
-foreach (STUFEN as $stufe) {
-    $texte[$stufe] = true; // werden als t(STUFEN[...]) übersetzt
+foreach (array_merge(array_values(STUFEN), array_values(THEMEN)) as $text) {
+    $texte[$text] = true; // werden als t(STUFEN[...]) bzw. t(THEMEN[...]) übersetzt
 }
 foreach (array_keys(SPRACHEN) as $sp) {
     if ($sp === 'de') {

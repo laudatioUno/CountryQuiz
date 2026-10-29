@@ -17,6 +17,7 @@ Made for exam preparation at school (7th grade): pupils practise on their phone 
 - Results stored in SQLite; evaluation at the end with the place in the ranking
 - Public rankings per game type, level and length, top 5 on the start page, CSV export
 - German and French, including country and capital names and the answer checking; the choice is remembered, the browser language decides on the first visit
+- Dark mode: follows the device setting, or choose light/dark yourself
 - No login, no external services, no JavaScript framework
 
 ## Requirements

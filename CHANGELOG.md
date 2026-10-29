@@ -3,6 +3,15 @@
 All notable changes to CountryQuiz. Versions follow [semantic versioning](https://semver.org/).
 The section of a version is used as the release notes on GitHub.
 
+## [1.2.0] – 2026-10
+
+### Added
+- Dark mode: follows the device setting automatically; switch *Automatisch / Hell / Dunkel* (*Automatique / Clair / Sombre*) next to the language switch at the top of the start page and in the footer. The choice is remembered (cookie) and applied by the server, so pages don't flash when they load.
+- All colours are defined once as variables; the dark scheme meets the WCAG contrast ratio of 4.5:1 for text.
+
+### Changed
+- Outline thumbnails in the evaluation get the same light background as in the quiz, so they stay visible on dark backgrounds.
+
 ## [1.1.0] – 2026-10
 
 ### Added

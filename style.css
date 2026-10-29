@@ -12,6 +12,20 @@
   --falsch-bg: #fdecea;
   --tipp: #9a6400;
   --tipp-bg: #fff4dc;
+  --akzent-text: #1f4fa3;    /* Links und Text in Akzentfarbe */
+  --auf-akzent: #ffffff;     /* Text auf Akzent-/Statusflächen */
+  --akzent-sanft: #d6e0f5;
+  --feld: #ffffff;           /* Eingabefelder, Knöpfe, Optionen */
+  --kopf: #faf8f4;           /* Tabellenköpfe */
+  --gedaempft: #faf8f4;      /* nicht gewählte Optionen nach der Antwort */
+  --gedaempft-linie: #e6e1d6;
+  --gedaempft-knopf: #eeebe4;
+  --markiert: #fff4c2;       /* eigene Zeile in der Rangliste */
+  --gold: #e0a800;
+  --gold-text: #b88700;
+  --bild-grund: #f7f5f0;     /* Hintergrund der Umrisse */
+  --schatten: rgba(0,0,0,.04);
+  color-scheme: light;
   --radius: 12px;
 }
 * { box-sizing: border-box; }
@@ -24,7 +38,7 @@ body {
 }
 main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
 h1 { margin: 0; font-size: 1.6rem; letter-spacing: -0.01em; }
-a { color: var(--akzent); }
+a { color: var(--akzent-text); }
 
 .hero { text-align: center; margin: 32px 0 24px; }
 .hero h1 { font-size: 2.2rem; }
@@ -41,7 +55,7 @@ a { color: var(--akzent); }
   background: var(--karte);
   border: 1px solid var(--linie);
   border-radius: var(--radius);
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  box-shadow: 0 1px 2px var(--schatten);
 }
 
 /* Startformular */
@@ -50,7 +64,7 @@ a { color: var(--akzent); }
 label { font-weight: 600; font-size: .9rem; }
 input {
   width: 100%; padding: 10px 12px; font: inherit;
-  border: 1px solid var(--linie); border-radius: 8px; background: #fff; color: var(--text);
+  border: 1px solid var(--linie); border-radius: 8px; background: var(--feld); color: var(--text);
 }
 input:focus { outline: 2px solid var(--akzent); outline-offset: 0; border-color: var(--akzent); }
 fieldset { border: 0; padding: 0; margin: 4px 0; display: grid; gap: 8px; }
@@ -66,13 +80,13 @@ legend { font-weight: 600; font-size: .9rem; margin-bottom: 8px; }
 
 button, .knopf {
   display: inline-block; padding: 11px 22px; font: inherit; font-weight: 600;
-  background: var(--akzent); color: #fff; border: 0; border-radius: 8px;
+  background: var(--akzent); color: var(--auf-akzent); border: 0; border-radius: 8px;
   cursor: pointer; text-decoration: none; text-align: center;
 }
 button:hover, .knopf:hover { filter: brightness(1.1); }
 .sekundaer {
   display: inline-block; padding: 10px 18px; border-radius: 8px;
-  border: 1px solid var(--linie); background: #fff; color: var(--text); text-decoration: none;
+  border: 1px solid var(--linie); background: var(--feld); color: var(--text); text-decoration: none;
 }
 
 /* Quiz-Raster */
@@ -111,7 +125,7 @@ dd { margin: 2px 0 0; font-weight: 700; font-size: 1.15rem; }
 .tabelle-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--linie); vertical-align: middle; }
-th { font-size: .8rem; color: var(--leise); font-weight: 600; background: #faf8f4; }
+th { font-size: .8rem; color: var(--leise); font-weight: 600; background: var(--kopf); }
 tr:last-child td { border-bottom: 0; }
 .auswertung img { height: 32px; display: block; border: 1px solid var(--linie); }
 .auswertung td.nr { color: var(--leise); width: 2.5em; }
@@ -132,7 +146,7 @@ tr:last-child td { border-bottom: 0; }
 .liste td { white-space: nowrap; }
 .aktionen { display: flex; gap: 10px; align-items: center; }
 .aktionen form { margin: 0; }
-.mini { padding: 4px 10px; font-size: .8rem; font-weight: 500; background: #fff; color: var(--falsch); border: 1px solid var(--linie); }
+.mini { padding: 4px 10px; font-size: .8rem; font-weight: 500; background: var(--feld); color: var(--falsch); border: 1px solid var(--linie); }
 .leer { padding: 24px; text-align: center; color: var(--leise); margin: 0; }
 
 @media (max-width: 520px) {
@@ -173,15 +187,15 @@ tr:last-child td { border-bottom: 0; }
 /* Ranglisten */
 th.r, td.r { text-align: right; }
 td.rang { font-weight: 700; width: 3.5em; }
-tr.markiert td { background: #fff4c2; }
-tr.markiert td:first-child { box-shadow: inset 4px 0 0 #e0a800; }
+tr.markiert td { background: var(--markiert); }
+tr.markiert td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
 .du {
   display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 99px;
-  background: #e0a800; color: #fff; font-size: .72rem; font-weight: 700; vertical-align: 1px;
+  background: var(--gold); color: #1f2430; font-size: .72rem; font-weight: 700; vertical-align: 1px;
 }
 .platzierung { margin-bottom: 24px; overflow: hidden; }
 .platz { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-bottom: 1px solid var(--linie); }
-.platz-nr { font-size: 2.6rem; font-weight: 800; line-height: 1; color: #b88700; }
+.platz-nr { font-size: 2.6rem; font-weight: 800; line-height: 1; color: var(--gold-text); }
 .platz strong { display: block; font-size: 1.15rem; }
 .platz small { color: var(--leise); }
 .rang-scroll { max-height: 340px; overflow: auto; position: relative; }
@@ -191,11 +205,11 @@ tr.markiert td:first-child { box-shadow: inset 4px 0 0 #e0a800; }
 .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
 .tabs a {
   padding: 9px 18px; border-radius: 99px; text-decoration: none; color: var(--text);
-  border: 1px solid var(--linie); background: #fff; font-weight: 600;
+  border: 1px solid var(--linie); background: var(--feld); font-weight: 600;
 }
 .tabs a span { color: var(--leise); font-weight: 500; margin-left: 4px; }
-.tabs a.aktiv { background: var(--akzent); border-color: var(--akzent); color: #fff; }
-.tabs a.aktiv span { color: #d6e0f5; }
+.tabs a.aktiv { background: var(--akzent); border-color: var(--akzent); color: var(--auf-akzent); }
+.tabs a.aktiv span { color: var(--akzent-sanft); }
 
 .bestenliste { max-width: 760px; margin: 40px auto 0; }
 .bl-kopf { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -223,7 +237,7 @@ tr.markiert td:first-child { box-shadow: inset 4px 0 0 #e0a800; }
 .wahl small { display: block; color: var(--leise); font-size: .85rem; margin-top: 2px; }
 .neu {
   font-style: normal; font-size: .68rem; font-weight: 700; letter-spacing: .04em;
-  color: #fff; background: var(--akzent); border-radius: 99px; padding: 2px 8px;
+  color: var(--auf-akzent); background: var(--akzent); border-radius: 99px; padding: 2px 8px;
 }
 .wahl.stufe { flex-direction: column; align-items: stretch; gap: 6px; }
 .stufe-kopf { display: flex; justify-content: space-between; align-items: center; }
@@ -236,14 +250,14 @@ tr.markiert td:first-child { box-shadow: inset 4px 0 0 #e0a800; }
 
 .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .chips a {
-  padding: 7px 14px; border-radius: 99px; border: 1px solid var(--linie); background: #fff;
+  padding: 7px 14px; border-radius: 99px; border: 1px solid var(--linie); background: var(--feld);
   color: var(--text); text-decoration: none; font-weight: 600; font-size: .9rem;
 }
-.chips a.aktiv { background: var(--akzent); border-color: var(--akzent); color: #fff; }
+.chips a.aktiv { background: var(--akzent); border-color: var(--akzent); color: var(--auf-akzent); }
 
 /* ---- Quiz: Umrisse ---- */
 .umriss-bild {
-  position: relative; background: #f7f5f0; border-radius: 8px; height: 230px;
+  position: relative; background: var(--bild-grund); border-radius: 8px; height: 230px;
   display: flex; align-items: center; justify-content: center; padding: 8px;
 }
 .umriss-bild img { width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
@@ -251,21 +265,21 @@ tr.markiert td:first-child { box-shadow: inset 4px 0 0 #e0a800; }
 .umriss-bild.karte-bild img { object-fit: cover; }
 .karten-chip {
   position: absolute; top: 8px; left: 8px; font-size: .75rem; font-weight: 700;
-  background: #fff; border: 1px solid var(--linie); border-radius: 99px; padding: 3px 10px;
+  background: var(--feld); color: var(--text); border: 1px solid var(--linie); border-radius: 99px; padding: 3px 10px;
 }
 .frage-text { margin: 0; text-align: center; font-weight: 700; font-size: 1.15rem; }
 .optionen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .einzel .option {
   width: 100%; margin: 0; min-height: 56px; display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border: 1px solid var(--linie); border-radius: 10px;
-  background: #fff; color: var(--text); font: inherit; font-weight: 600; text-align: left;
+  background: var(--feld); color: var(--text); font: inherit; font-weight: 600; text-align: left;
 }
 button.option { cursor: pointer; }
 button.option:hover { border-color: var(--akzent); background: var(--akzent-hell); filter: none; }
 .buchstabe, .marke {
   width: 26px; height: 26px; border-radius: 99px; flex-shrink: 0; font-size: .8rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  background: var(--akzent-hell); color: var(--akzent);
+  background: var(--akzent-hell); color: var(--akzent-text);
 }
 .flaggen-optionen .option { position: relative; flex-direction: column; justify-content: center; height: 112px; padding: 12px; text-align: center; gap: 6px; }
 .flaggen-optionen .option img { height: 58px; width: auto; max-width: 100%; border: 1px solid var(--linie); }
@@ -275,21 +289,21 @@ button.option:hover { border-color: var(--akzent); background: var(--akzent-hell
 .opt-text { display: flex; flex-direction: column; line-height: 1.2; }
 .opt-zusatz { font-size: .75rem; font-weight: 500; }
 .option.opt-ok { border: 2px solid var(--ok); background: var(--ok-bg); color: var(--ok); }
-.option.opt-ok .marke { background: var(--ok); color: #fff; }
+.option.opt-ok .marke { background: var(--ok); color: var(--karte); }
 .option.opt-falsch { border: 2px solid var(--falsch); background: var(--falsch-bg); color: var(--falsch); }
-.option.opt-falsch .marke { background: var(--falsch); color: #fff; }
+.option.opt-falsch .marke { background: var(--falsch); color: var(--karte); }
 .option.opt-falsch .opt-name { text-decoration: line-through; }
-.option.opt-aus { background: #faf8f4; border-color: #e6e1d6; color: var(--leise); font-weight: 500; }
-.option.opt-aus .buchstabe { background: #eeebe4; color: var(--leise); }
+.option.opt-aus { background: var(--gedaempft); border-color: var(--gedaempft-linie); color: var(--leise); font-weight: 500; }
+.option.opt-aus .buchstabe { background: var(--gedaempft-knopf); color: var(--leise); }
 .hinweis { margin: 0; text-align: center; font-size: .85rem; color: var(--leise); }
 .info-zeile { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--bg); font-size: .92rem; }
 
 /* ---- Auswertung / Ergebnisse ---- */
 .kombi-chip {
   display: inline-block; vertical-align: middle; margin-left: 8px; font-size: .85rem; font-weight: 600;
-  color: var(--akzent); background: var(--akzent-hell); border-radius: 99px; padding: 4px 12px;
+  color: var(--akzent-text); background: var(--akzent-hell); border-radius: 99px; padding: 4px 12px;
 }
-.auswertung .umriss-klein { width: 72px; height: 54px; object-fit: contain; display: block; border: 0; }
+.auswertung .umriss-klein { width: 72px; height: 54px; object-fit: contain; display: block; border: 0; box-sizing: border-box; padding: 3px; border-radius: 6px; background: var(--bild-grund); }
 .auswertung td.gesucht { font-weight: 600; }
 .flagge-klein { height: 22px; width: auto; vertical-align: middle; border: 1px solid var(--linie); }
 .auswertung .flagge-klein { display: inline; height: 22px; }
@@ -300,7 +314,7 @@ button.option:hover { border-color: var(--akzent); background: var(--akzent-hell
 .segment { display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: var(--bg); }
 .segment a { padding: 6px 14px; border-radius: 6px; text-decoration: none; color: var(--text); font-weight: 600; font-size: .9rem; }
 .segment a span { color: var(--leise); font-weight: 500; }
-.segment a.aktiv { background: #fff; color: var(--akzent); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.segment a.aktiv { background: var(--feld); color: var(--akzent-text); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
 
 /* ---- Update-Seite ---- */
 .update { max-width: 520px; margin-top: 40px; }
@@ -323,6 +337,81 @@ button.option:hover { border-color: var(--akzent); background: var(--akzent-hell
 .oben-rechts { display: flex; justify-content: flex-end; }
 .sprachwahl { display: inline-flex; gap: 4px; padding: 3px; border-radius: 99px; background: var(--karte); border: 1px solid var(--linie); font-size: .85rem; }
 .sprachwahl a, .sprachwahl span { padding: 4px 12px; border-radius: 99px; text-decoration: none; color: var(--text); }
-.sprachwahl span[aria-current] { background: var(--akzent); color: #fff; font-weight: 600; }
+.sprachwahl span[aria-current] { background: var(--akzent); color: var(--auf-akzent); font-weight: 600; }
 .sprachwahl a:hover { background: var(--akzent-hell); }
 .app-footer { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* ---- Darstellung: Umschalter Auto / Hell / Dunkel ---- */
+.umschalter-leiste { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.oben-rechts .umschalter-leiste { justify-content: flex-end; }
+.themawahl { display: inline-flex; gap: 4px; padding: 3px; border-radius: 99px; background: var(--karte); border: 1px solid var(--linie); font-size: .85rem; }
+.themawahl > a, .themawahl > span { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; text-decoration: none; color: var(--text); }
+.themawahl > span[aria-current] { background: var(--akzent); color: var(--auf-akzent); font-weight: 600; }
+.themawahl a:hover { background: var(--akzent-hell); }
+.themawahl svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ---- Dunkles Farbschema ----
+   Gilt, wenn das Gerät dunkel eingestellt ist (ausser "Hell" ist gewählt)
+   oder wenn "Dunkel" gewählt ist. Beide Blöcke enthalten dieselben Werte. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="hell"]) {
+    --bg: #14171e;
+    --karte: #1d212b;
+    --text: #e6e8ee;
+    --leise: #a6acba;
+    --linie: #353b49;
+    --akzent: #3b6fd4;
+    --akzent-hell: #22324f;
+    --akzent-text: #9bbcff;
+    --akzent-sanft: #d6e0f5;
+    --ok: #5fcb8d;
+    --ok-bg: #173022;
+    --falsch: #ff8f86;
+    --falsch-bg: #3a1e1e;
+    --tipp: #f1bd5f;
+    --tipp-bg: #3a2c12;
+    --feld: #252a35;
+    --kopf: #222733;
+    --gedaempft: #1a1e27;
+    --gedaempft-linie: #2c313d;
+    --gedaempft-knopf: #2b303c;
+    --markiert: #3a3217;
+    --gold: #e0a800;
+    --gold-text: #f2c94c;
+    --bild-grund: #d8d3c8;
+    --schatten: rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dunkel"] {
+  --bg: #14171e;
+  --karte: #1d212b;
+  --text: #e6e8ee;
+  --leise: #a6acba;
+  --linie: #353b49;
+  --akzent: #3b6fd4;
+  --akzent-hell: #22324f;
+  --akzent-text: #9bbcff;
+  --akzent-sanft: #d6e0f5;
+  --ok: #5fcb8d;
+  --ok-bg: #173022;
+  --falsch: #ff8f86;
+  --falsch-bg: #3a1e1e;
+  --tipp: #f1bd5f;
+  --tipp-bg: #3a2c12;
+  --feld: #252a35;
+  --kopf: #222733;
+  --gedaempft: #1a1e27;
+  --gedaempft-linie: #2c313d;
+  --gedaempft-knopf: #2b303c;
+  --markiert: #3a3217;
+  --gold: #e0a800;
+  --gold-text: #f2c94c;
+  --bild-grund: #d8d3c8;
+  --schatten: rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+@media (max-width: 420px) {
+  .themawahl .thema-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .themawahl > a, .themawahl > span { padding: 5px 9px; }
+}
