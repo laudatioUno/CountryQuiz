@@ -1,10 +1,12 @@
 name: Release
 
-# Builds the release ZIP and publishes it as a GitHub release with notes. Two ways to start it:
+# Builds the release ZIP and publishes it as a GitHub release with notes. Three ways to start it:
 #
-#  1. In the browser: Actions › Release › "Run workflow", enter the version (e.g. 1.1.0).
-#     The workflow creates the tag v<version> on main and the release.
-#  2. With git: push a tag like v1.1.0.
+#  1. Automatically: merge a pull request into main that raises APP_VERSION in version.php.
+#     If there is no release for that version yet, it is created (tag v<version> on main).
+#     A change of version.php without a new version (e.g. a comment) creates nothing.
+#  2. In the browser: Actions › Release › "Run workflow", enter the version (e.g. 1.1.0).
+#  3. With git: push a tag like v1.1.0.
 #
 # The version must match APP_VERSION in version.php.
 # The release notes are the section of this version in CHANGELOG.md
@@ -22,10 +24,17 @@ on:
         type: boolean
         default: false
   push:
+    branches: [main]
+    paths: ['version.php']
     tags: ['v*']
 
 permissions:
   contents: write
+
+# Never two releases at the same time
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -38,11 +47,16 @@ jobs:
         env:
           INPUT_VERSION: ${{ inputs.version }}
         run: |
+          AUTO=false
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             if [ "$GITHUB_REF" != "refs/heads/main" ]; then
               echo "::error::Start the release from the main branch."; exit 1
             fi
             VERSION="${INPUT_VERSION#v}"
+          elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            # Merge into main that changed version.php: take the version from the file
+            AUTO=true
+            VERSION=$(php -r 'require "version.php"; echo APP_VERSION;')
           else
             VERSION="${GITHUB_REF_NAME#v}"
           fi
@@ -55,24 +69,37 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "auto=$AUTO" >> "$GITHUB_OUTPUT"
 
       - name: Check that the release does not exist yet
+        id: exists
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "${{ steps.v.outputs.tag }}" > /dev/null 2>&1; then
+          if gh release view "${{ steps.v.outputs.tag }}" > /dev/null 2>&1 \
+             || git ls-remote --exit-code --tags origin "refs/tags/${{ steps.v.outputs.tag }}" > /dev/null 2>&1; then
+            if [ "${{ steps.v.outputs.auto }}" = "true" ]; then
+              # Automatic run: version unchanged, nothing to do
+              echo "::notice::Version ${{ steps.v.outputs.version }} is already released – no new release."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             echo "::error::Release ${{ steps.v.outputs.tag }} already exists."; exit 1
           fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Lint and self test
+        if: steps.exists.outputs.skip != 'true'
         run: |
           find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l > /dev/null
           php tests/selftest.php
 
       - name: Build ZIP
+        if: steps.exists.outputs.skip != 'true'
         run: bin/build-release.sh "${{ steps.v.outputs.version }}"
 
       - name: Create GitHub release
+        if: steps.exists.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PRERELEASE: ${{ inputs.prerelease && '--prerelease' || '' }}

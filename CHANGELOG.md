@@ -21,7 +21,7 @@ First version: an online exercise for the 46 countries of Europe – flags, capi
 - Rankings without password, one per combination of game type, level and length; top 5 on the start page; search by name and CSV export.
 - Database update page: an existing database from an earlier installation is updated with one click («Update nötig» › GO), with an automatic backup copy first.
 - Version shown in the page footer.
-- GitHub Actions: CI with lint, self test and a test ZIP for every pull request; release workflow that builds the ZIP and publishes it with these notes.
+- GitHub Actions: CI with lint, self test and a test ZIP for every pull request; release workflow that builds the ZIP and publishes it with these notes – automatically when a merge into main raises the version in `version.php`, or manually.
 
 ### Database
 - Table `resultate` with the columns `spielart` (flaggen/umrisse) and `stufe` (leicht/mittel/schwer); schema version 2 (`PRAGMA user_version`).

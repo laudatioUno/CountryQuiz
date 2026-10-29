@@ -43,9 +43,10 @@ If you changed `config.php`, apply your changes again after uploading.
 
 ## Release
 
-1. Raise `APP_VERSION` in `version.php` and add a section for the new version to `CHANGELOG.md`, in a pull request.
-2. After merging: **Actions › Release › Run workflow**, enter the version (e.g. `1.1.0`).
-3. The workflow checks that the version matches `version.php`, runs the self test, builds `countryquiz-<version>.zip` and publishes the release with the changelog section as release notes.
+1. In a pull request: raise `APP_VERSION` in `version.php` and add a section for the new version to `CHANGELOG.md`.
+2. Merge the pull request. The release is created **automatically**: the workflow sees the new version in `version.php`, runs the self test, builds `countryquiz-<version>.zip` and publishes the release (tag `v<version>`) with the changelog section as release notes.
+   A merge that does not change `version.php`, or changes it without a new version, creates no release.
+3. Manually, if ever needed: **Actions › Release › Run workflow** with the version (e.g. `1.1.0`).
 
 Every pull request gets a test ZIP: **Checks › CI › Summary › Artifacts**.
 
